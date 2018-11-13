@@ -8,11 +8,6 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const packageJSON = require("./package.json");
 const VENDOR_LIBS = Object.keys(packageJSON.dependencies);
 
-const phaserModule = path.join(__dirname, '/node_modules/phaser/');
-const phaser = path.join(phaserModule, 'build/custom/phaser-split.js');
-const pixi = path.join(phaserModule, 'build/custom/pixi.js');
-const p2 = path.join(phaserModule, 'build/custom/p2.js');
-
 module.exports = {
   devtool: 'inline-source-map',
   entry: {
@@ -38,17 +33,7 @@ module.exports = {
       { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader'},
       { test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?prefix=font/&limit=5000' },
       { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=application/octet-stream' },
-      { test: /pixi\.js/, use: 'expose-loader?PIXI' },
-      { test: /phaser-split\.js$/, use: 'expose-loader?Phaser' },
-      { test: /p2\.js/, use: 'expose-loader?p2' },
     ],
-  },
-  resolve: {
-      alias: {
-          'phaser': phaser,
-          'pixi.js': pixi,
-          'p2': p2,
-      }
   },
 	plugins: [
     new CleanWebpackPlugin(['build']),
@@ -72,5 +57,10 @@ module.exports = {
         to: path.resolve(__dirname, 'build'),
       }
     ]),
-	],
+  ],
+  resolve: {
+    alias: {
+      "Assets": 'public/assets/'
+    },
+  },
 }
