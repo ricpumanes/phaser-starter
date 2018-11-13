@@ -1,0 +1,8 @@
+node_modules/
+www/
+platforms/
+build
+release-builds
+*.lock
+*.log
+package-lock.json

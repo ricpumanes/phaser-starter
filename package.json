@@ -1,0 +1,36 @@
+{
+  "name": "gametut1",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "webpack --config ./webpack-prod.config.js",
+    "dev": "webpack-dev-server --inline --progress",
+    "simulate": "node ./build/server.js"
+  },
+  "devDependencies": {
+    "babel-cli": "6.23.0",
+    "babel-loader": "6.3.2",
+    "babel-preset-env": "1.1.8",
+    "clean-webpack-plugin": "0.1.17",
+    "copy-webpack-plugin": "4.3.1",
+    "css-loader": "0.26.1",
+    "expose-loader": "0.7.3",
+    "extract-text-webpack-plugin": "2.0.0-beta.4",
+    "file-loader": "0.10.0",
+    "html-webpack-plugin": "2.28.0",
+    "image-webpack-loader": "3.2.0",
+    "json-loader": "0.5.4",
+    "style-loader": "0.13.1",
+    "url-loader": "0.5.7",
+    "webpack": "3.10.0",
+    "webpack-dev-server": "2.4.1"
+  },
+  "dependencies": {
+    "express": "4.15.2",
+    "p2": "0.7.1",
+    "phaser": "2.6.2",
+    "script-loader": "0.7.0"
+  },
+  "author": "",
+  "license": "ISC"
+}
