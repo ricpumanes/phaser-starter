@@ -1,97 +1,89 @@
 import Phaser from 'phaser';
-var config = {
-    type: Phaser.CANVAS,
-    width: 800,
-    height: 600,
-    physics: {
-        default: 'arcade',
-        arcade: {
-            gravity: { y: 300 },
-            debug: false
+
+const gameScene = new Phaser.Scene('Game');
+
+let config = {
+    type: Phaser.AUTO,  //Phaser will decide how to render our game (WebGL or Canvas)
+    width: 640, // game width
+    height: 360, // game height
+    scene: gameScene // our newly created scene
+  };
+  
+  // create the game, and pass it the configuration
+  let game = new Phaser.Game(config);
+
+  gameScene.gameOver = function() {
+    this.isPlayerAlive = false;
+    this.cameras.main.shake(500);
+
+    this.time.delayedCall(250, function() {
+        this.cameras.main.fade(250);
+      }, [], this);
+    
+    this.time.delayedCall(500, function() {
+      this.scene.restart();
+    }, [], this);
+  }
+
+  gameScene.init = function() {
+    this.playerSpeed = 1.5;
+    this.enemyMaxY = 280;
+    this.enemyMinY = 80;
+  }
+
+  gameScene.preload = function() {
+    this.load.image('background', 'Assets/background.png');
+    this.load.image('player', 'Assets/player.png');
+    this.load.image('dragon', 'Assets/dragon.png');
+    this.load.image('treasure', 'Assets/treasure.png');
+  }
+
+  gameScene.create = function() {
+    const bg = this.add.sprite(0, 0, 'background');
+    bg.setOrigin(0, 0);
+
+    this.player = this.add.sprite(40, this.sys.game.config.height / 2, 'player');
+    this.player.setScale(0.5);
+
+    this.treasure = this.add.sprite(this.sys.game.config.width - 80, this.sys.game.config.height / 2, 'treasure');
+    this.treasure.setScale(0.5);
+
+    this.enemies = this.add.group({
+        key: 'dragon',
+        repeat: 5,
+        setXY: {
+          x: 110,
+          y: 100,
+          stepX: 80,
+          stepY: 20
         }
-    },
-    scene: {
-        preload: preload,
-        create: create,
-        update: update
-    }
-};
+      });
+    
+    Phaser.Actions.ScaleXY(this.enemies.getChildren(), -0.5, -0.5);
+    Phaser.Actions.Call(this.enemies.getChildren(), function(enemy) {
+        enemy.speed = Math.random() * 2 + 1;
+    }, this);
 
-var game = new Phaser.Game(config);
-var platforms, player, cursors;
+    this.isPlayerAlive = true;
+    this.cameras.main.resetFX();
+  }
 
-function preload () {
-    this.load.image('sky', 'Assets/sky.png');
-    this.load.image('ground', 'Assets/platform.png');
-    this.load.image('star', 'Assets/star.png');
-    this.load.image('bomb', 'Assets/bomb.png');
-    this.load.spritesheet('dude', 
-        'Assets/dude.png',
-        { frameWidth: 32, frameHeight: 48 }
-    );
-}
+  gameScene.update = function() {
+      if (!this.isPlayerAlive) return;
+      if(this.input.activePointer.isDown) {
+        this.player.x += this.playerSpeed;
+      }
+      if (Phaser.Geom.Intersects.RectangleToRectangle(this.player.getBounds(), this.treasure.getBounds())) {
+        this.gameOver();
+      }
+      const enemies = this.enemies.getChildren(); // []
+      enemies.map((enemy) => {
+        enemy.y += enemy.speed;
+        if (enemy.y >= this.enemyMaxY && enemy.speed > 0) { enemy.speed *= -1; }
+        if (enemy.y <= this.enemyMinY && enemy.speed < 0) { enemy.speed *= -1; }
 
-function create () {
-    this.add.image(0, 0, 'sky').setOrigin(0, 0);
-    platforms = this.physics.add.staticGroup();
-
-    platforms.create(400, 568, 'ground').setScale(2).refreshBody();
-
-    platforms.create(600, 400, 'ground');
-    platforms.create(50, 250, 'ground');
-    platforms.create(750, 220, 'ground');
-
-    player = this.physics.add.sprite(100, 450, 'dude');
-
-    player.setBounce(0.2);
-    player.setCollideWorldBounds(true);
-
-    this.anims.create({
-        key: 'left',
-        frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
-        frameRate: 10,
-        repeat: -1 // loop
-    });
-
-    this.anims.create({
-        key: 'turn',
-        frames: [ { key: 'dude', frame: 4 } ],
-        frameRate: 20
-    });
-
-    this.anims.create({
-        key: 'right',
-        frames: this.anims.generateFrameNumbers('dude', { start: 5, end: 8 }),
-        frameRate: 10,
-        repeat: -1
-    });
-
-    this.physics.add.collider(player, platforms);
-    cursors = this.input.keyboard.createCursorKeys();
-}
-
-function update () {
-    if (cursors.left.isDown)
-    {
-        player.setVelocityX(-160);
-
-        player.anims.play('left', true);
-    }
-    else if (cursors.right.isDown)
-    {
-        player.setVelocityX(160);
-
-        player.anims.play('right', true);
-    }
-    else
-    {
-        player.setVelocityX(0);
-
-        player.anims.play('turn');
-    }
-
-    if (cursors.up.isDown && player.body.touching.down)
-    {
-        player.setVelocityY(-330);
-    }
-}
+        if (Phaser.Geom.Intersects.RectangleToRectangle(this.player.getBounds(), enemy.getBounds())) {
+            this.gameOver();
+        }
+      });
+  }
