@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+
 var config = {
     type: Phaser.CANVAS,
     width: 800,
